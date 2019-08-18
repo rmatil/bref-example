@@ -38,14 +38,24 @@ class AppKernel extends Kernel
         return __DIR__;
     }
 
-    public function getCacheDir()
-    {
-        return dirname(__DIR__).'/var/cache/'.$this->getEnvironment();
-    }
-
     public function getLogDir()
     {
-        return dirname(__DIR__).'/var/logs';
+        // When on the lambda only /tmp is writeable
+        if (getenv('LAMBDA_TASK_ROOT') !== false) {
+            return '/tmp/log/';
+        }
+
+        return $this->getProjectDir().'/var/log';
+    }
+
+    public function getCacheDir()
+    {
+        // When on the lambda only /tmp is writeable
+        if (getenv('LAMBDA_TASK_ROOT') !== false) {
+            return '/tmp/cache/'.$this->environment;
+        }
+
+        return $this->getProjectDir().'/var/cache/'.$this->environment;
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader)
